@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { login } from '../services/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,11 +15,21 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    // Fake authentication - just simulate delay and redirect
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Real API authentication
+      const response = await login(formData);
+      
+      // Store token and user data
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Redirect to dashboard
       navigate('/');
-    }, 1500);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -105,7 +116,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Demo credentials: <span className="font-medium text-gray-700">any email / any password</span>
+              Enter your credentials to access the dashboard
             </p>
           </div>
         </div>

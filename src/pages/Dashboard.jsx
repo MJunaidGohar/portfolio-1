@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, ShoppingCart, DollarSign, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Card from '../components/Card';
-import { fetchUsers, fetchCarts, fetchProducts } from '../services/api';
+import { fetchDashboardStats } from '../services/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -13,35 +13,28 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const chartData = [
-    { name: 'Jan', revenue: 4000, orders: 240 },
-    { name: 'Feb', revenue: 3000, orders: 198 },
-    { name: 'Mar', revenue: 5000, orders: 300 },
-    { name: 'Apr', revenue: 4500, orders: 280 },
-    { name: 'May', revenue: 6000, orders: 390 },
-    { name: 'Jun', revenue: 5500, orders: 350 },
-  ];
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
         setLoading(true);
-        const [usersRes, cartsRes, productsRes] = await Promise.all([
-          fetchUsers(100),
-          fetchCarts(),
-          fetchProducts(100),
-        ]);
-
-        const totalRevenue = cartsRes.data.carts.reduce((sum, cart) => sum + cart.total, 0);
+        const response = await fetchDashboardStats();
+        const data = response.data;
 
         setStats({
-          totalUsers: usersRes.data.total || usersRes.data.users.length,
-          totalOrders: cartsRes.data.total || cartsRes.data.carts.length,
-          revenue: totalRevenue,
-          activeUsers: Math.floor(usersRes.data.users.length * 0.7),
+          totalUsers: data.totalUsers || 0,
+          totalOrders: data.totalOrders || 0,
+          revenue: data.revenue || 0,
+          activeUsers: data.activeUsers || 0,
         });
+
+        // Real chart data from backend
+        setChartData(data.chartData || []);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
+        // Fallback to empty data
+        setChartData([]);
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchCarts } from '../services/api';
+import { fetchOrders, updateOrderStatus } from '../services/api';
 import { Package, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const Orders = () => {
@@ -14,20 +14,31 @@ const Orders = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetchCarts();
-      const carts = response.data.carts.map((cart, index) => ({
-        ...cart,
-        status: index % 3 === 0 ? 'pending' : index % 3 === 1 ? 'completed' : 'cancelled',
-        orderNumber: `ORD-${String(cart.id).padStart(4, '0')}`,
-        customer: `Customer ${cart.id}`,
-      }));
-      setOrders(carts);
+      const response = await fetchOrders(filterStatus);
+      setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Error loading orders:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      // Refresh orders after update
+      loadOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Failed to update order status');
+    }
+  };
+
+  // Reload orders when filter changes
+  useEffect(() => {
+    loadOrders();
+  }, [filterStatus]);
 
   const getStatusConfig = (status) => {
     switch (status) {
@@ -58,10 +69,7 @@ const Orders = () => {
     }
   };
 
-  const filteredOrders = orders.filter((order) => {
-    if (filterStatus === 'all') return true;
-    return order.status === filterStatus;
-  });
+  const filteredOrders = orders;
 
   if (loading) {
     return (
