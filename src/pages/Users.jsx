@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, MoreHorizontal, RefreshCw, AlertCircle, Users, CheckCircle, XCircle, Power, PowerOff } from 'lucide-react';
+import { Search, Filter, MoreHorizontal, RefreshCw, AlertCircle, Users as UsersIcon, CheckCircle, XCircle, Power, PowerOff } from 'lucide-react';
 import { fetchUsers, searchUsers, updateUser } from '../services/api';
 
 // Skeleton Loading Component
@@ -33,7 +33,7 @@ const UserSkeleton = () => (
 const EmptyState = ({ searchQuery, onClear }) => (
   <div className="flex flex-col items-center justify-center py-16 px-4">
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-      <Users className="w-8 h-8 text-gray-400" />
+      <UsersIcon className="w-8 h-8 text-gray-400" />
     </div>
     <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
     <p className="text-sm text-gray-500 mb-4 text-center max-w-sm">
